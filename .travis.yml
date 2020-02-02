@@ -12,7 +12,7 @@ before_script:
 - sudo cp *.a /usr/lib
 - cd $TRAVIS_BUILD_DIR
 script:
-- conan install .
+- conan install . --build
 - cmake .
 - cmake --build .
 - cmake --build . --target test
