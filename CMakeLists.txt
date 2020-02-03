@@ -39,6 +39,7 @@ add_library(versionlib lib.cpp)
 add_executable(gtest_version  gtest_version.cpp)
 # --------------------------------------------------------------------------
 
+conan_basic_setup()
 
 # УСТАНАВЛИВАЕМ СВОЙСТВА ДЛЯ КОМПИЛЯЦИИ ИСПОЛНЯЕМЫМ ФАЙЛАМ И БИБЛИОТЕКАМ----
 
