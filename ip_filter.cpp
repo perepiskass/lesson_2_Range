@@ -3,7 +3,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-//#include <algorithm>
 #include <tuple>
 
 #include <chrono>
@@ -12,8 +11,8 @@
 //#include <range/v3/view/filter.hpp>
 #include <range/v3/algorithm/for_each.hpp>
 
-using mainVector = std::vector<std::vector<std::string> >;
-using sortVector = std::vector<std::vector<int> >;
+using mainVector = std::vector<std::vector<std::string>>;
+using intVector = std::vector<std::vector<int>>;
 
 enum octet {
     one = 0,
@@ -51,9 +50,9 @@ std::vector<std::string> split(const std::string &str, char d)
 }
 
 // Print function
-void printVector (const sortVector* sort_ip)
+void printVector (const intVector& sort_ip)
 {
-    for(const auto& ip : *sort_ip) 
+    for(const auto& ip : sort_ip) 
         {
             for(auto ip_part = ip.cbegin(); ip_part != ip.cend(); ++ip_part)
             {
@@ -67,52 +66,59 @@ void printVector (const sortVector* sort_ip)
         }
 }
 
-// Reverse lexicographically sort
-auto reverseSort(const mainVector& ip_pool)
+// Vector from string to int
+
+auto stringToInt(const mainVector& ip_pool)
 {
-    sortVector* ip = new sortVector;
+    intVector ip;
     for (auto& i : ip_pool)
     {
         std::vector<int> temp;
         for (auto& z : i)
         {
-            temp.push_back(atoi(z.c_str()));
+           if(atoi(z.c_str()) || z =="0")
+           {
+              if(auto x = atoi(z.c_str()); x < 256 && x >= 0) temp.emplace_back(std::move(x));
+           }
         }
-        ip->push_back(temp);
+        if (temp.size() == 4) ip.emplace_back(std::move(temp));
     }
 
-    ranges::action::sort(*ip,[](const auto& l,const auto& r){
+    return std::move(ip);
+}
+
+// Reverse lexicographically sort
+void reverseSort(intVector& ip)
+{
+    ranges::action::sort(ip,[](const auto& l,const auto& r){
     return std::tie(l[0],l[1],l[2],l[3]) > std::tie(r[0],r[1],r[2],r[3]);
      });
-
-    return ip;
 }
 
 
 // Search by condition and print
 template<typename... Args>
-void findAndPrint(const sortVector* sort_ip,Args&&... args)
+void findAndPrint(const intVector& sort_ip,Args&&... args)
 {
     printVector(sort_ip);
 }
 
 template<typename T,typename... Args>
-void findAndPrint(const sortVector* sort_ip,T&& t,Args&&... args)
+void findAndPrint(const intVector& sort_ip,T&& t,Args&&... args)
 {
-    auto tmp = new sortVector();
+    intVector tmp;
     if(t.second == any){
-        ranges::for_each(*sort_ip, [&tmp,&t](auto z){
-        if(z[0]==t.first || z[1]==t.first || z[2]==t.first || z[3]==t.first) tmp->push_back(z);       
+        ranges::for_each(sort_ip, [&tmp,&t](auto z){
+        if(z[0]==t.first || z[1]==t.first || z[2]==t.first || z[3]==t.first) tmp.emplace_back(z);       
         }); 
     }
     else{
-        ranges::for_each(*sort_ip, [&tmp,&t](auto z){
-        if(z[t.second]==t.first) tmp->push_back(z);       
+        ranges::for_each(sort_ip, [&tmp,&t](auto z){
+        if(z[t.second]==t.first) tmp.emplace_back(z);       
         });
     }
 
     findAndPrint(tmp,args...);
-    delete tmp;
 }
 
 
@@ -126,13 +132,14 @@ int main()
         for(std::string line; std::getline(std::cin, line);)
         {
             auto v = split(line, '\t');       
-            ip_pool.push_back(split(v.at(0), '.'));
+            ip_pool.emplace_back(split(v.at(0), '.'));
         }
 
         // TODO reverse lexicographically sort
-        auto sort_ip = reverseSort(ip_pool);
+        auto int_ip = stringToInt(ip_pool);
         // Print result
-        printVector(sort_ip);
+        reverseSort(int_ip);
+        printVector(int_ip);
 
 
         // 222.173.235.246
@@ -144,7 +151,7 @@ int main()
         // 1.1.234.8
         // TODO filter by first byte and output
         // ip = filter(1)
-        findAndPrint(sort_ip,Condition{1,octet::one});
+        findAndPrint(int_ip,Condition{1,octet::one});
 
 
         // 1.231.69.33
@@ -155,7 +162,7 @@ int main()
 
         // TODO filter by first and second bytes and output
         // ip = filter(46, 70)
-        findAndPrint(sort_ip,Condition{46,octet::one},Condition{70,octet::two});
+        findAndPrint(int_ip,Condition{46,octet::one},Condition{70,octet::two});
 
         // 46.70.225.39
         // 46.70.147.26
@@ -164,7 +171,7 @@ int main()
 
         // TODO filter by any byte and output
         // ip = filter_any(46)
-        findAndPrint(sort_ip,Condition{46,octet::any});
+        findAndPrint(int_ip,Condition{46,octet::any});
 
         // 186.204.34.46
         // 186.46.222.194
@@ -201,7 +208,6 @@ int main()
         // 39.46.86.85
         // 5.189.203.46
         
-        delete sort_ip;
         
     }
     catch(const std::exception &e)

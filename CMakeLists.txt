@@ -22,7 +22,7 @@ find_package(Threads)
 # include_directories(${Boost_INCLUDE_DIRS})
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 include_directories(${GTEST_INCLUDE_DIRS})
-include_directories(${PROJECT_SOURCE_DIR})
+#include_directories(${PROJECT_SOURCE_DIR})
 # --------------------------------------------------------------------------
 
 # Генерируем файл version.h при сборке из файла с уловиями version.h.in
@@ -39,6 +39,7 @@ add_library(versionlib lib.cpp)
 add_executable(gtest_version  gtest_version.cpp)
 # --------------------------------------------------------------------------
 
+#Функция установки пакетов CONAN в проект для линковки(я так понял)
 conan_basic_setup()
 
 # УСТАНАВЛИВАЕМ СВОЙСТВА ДЛЯ КОМПИЛЯЦИИ ИСПОЛНЯЕМЫМ ФАЙЛАМ И БИБЛИОТЕКАМ----
@@ -55,7 +56,7 @@ target_include_directories(versionlib
 )
 
 target_include_directories(ip_filter
-    PRIVATE "${CMAKE_SOURCE_DIR}/include"
+    PRIVATE ${CONAN_LIBS} #"${CMAKE_SOURCE_DIR}/include"
 )
 
 target_link_libraries(ip_filter ${CONAN_LIBS})
