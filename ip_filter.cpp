@@ -8,7 +8,6 @@
 #include <chrono>
 
 #include <range/v3/action/sort.hpp>
-//#include <range/v3/view/filter.hpp>
 #include <range/v3/algorithm/for_each.hpp>
 
 using mainVector = std::vector<std::vector<std::string>>;
